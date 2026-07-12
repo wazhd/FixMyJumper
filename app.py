@@ -11,6 +11,8 @@ import asyncio
 import json
 import threading
 import time
+import mediapipe.python.solutions.pose as mp_pose
+import mediapipe.python.solutions.drawing_utils as mp_drawing
 
 load_dotenv()
 
@@ -42,10 +44,7 @@ ai_running = False
 with open("instructions.txt", "r") as f:
     instructions = f.read()
 
-mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
-mp_drawing = mp.solutions.drawing_utils
-
 
 def calculate_angle(a, b, c):
     ang = math.degrees(math.atan2(c[1]-b[1], c[0]-b[0]) - math.atan2(a[1]-b[1], a[0]-b[0]))
@@ -310,7 +309,19 @@ async def ai(stats):
             print(f"Error with Gemini 5: {e}")
             pass
 
+@app.route('/get_processing_audio')
+def get_processing_audio():
+    try:
+        with open("coach_analysis.mp3", "rb") as f:
+            audio_data = f.read()
+        return Response(audio_data, mimetype="audio/mpeg")
+    except FileNotFoundError:
+        return jsonify({"error": "Processing audio file not found"}), 404
 
+@app.route('/get_coach_status')
+def get_coach_status():
+    global ai_running
+    return jsonify({"ai_running": ai_running})
 
 
 ai_lock = threading.Lock()
@@ -374,4 +385,4 @@ def get_audio():
         return jsonify({"error": "Audio file not found"}), 404
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='127.0.0.1', port=5000, debug=True, threaded=True)

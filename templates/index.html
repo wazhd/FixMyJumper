@@ -25,28 +25,51 @@
         </div>
     </div>
 
-    <script>
-        let lastMessage = "";
+<script>
+    let startedAnalyzing = false;
 
-        setInterval(() => {
-            fetch('/get_latest_feedback')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.feedback && data.feedback !== lastMessage) {
-                        lastMessage = data.feedback;
-                        
-                        document.getElementById('aiTextContainer').innerText = data.feedback;
-                        document.getElementById('aiTextContainer').style.display = 'block';
-                        document.getElementById('emptyPrompt').style.display = 'none';
+    function playAudio(url) {
+        const player = document.getElementById('audioPlayer');
+        player.pause();
+        player.currentTime = 0;
+        player.src = url;
+        player.load();
+        player.play().catch(e => console.log("Audio playback error:", e));
+    }
 
-                        const player = document.getElementById('audioPlayer');
-                        player.src = "/get_audio?t=" + new Date().getTime(); 
-                        player.play().catch(e => console.log("Audio playback waiting for user interaction:", e));
-                    }
-                })
-                .catch(err => console.error("Error fetching updates:", err));
-        }, 250);
-    </script>
+    setInterval(() => {
+        fetch('/get_coach_status')
+            .then(response => response.json())
+            .then(statusData => {
+                const textContainer = document.getElementById('aiTextContainer');
+                const emptyPrompt = document.getElementById('emptyPrompt');
+
+                if (statusData.ai_running && !startedAnalyzing) {
+                    startedAnalyzing = true;
+
+                    textContainer.innerText = "Please wait! Coach is analyzing...";
+                    textContainer.style.display = 'block';
+                    emptyPrompt.style.display = 'none';
+
+                    playAudio("/get_processing_audio?t=" + Date.now());
+                }
+
+                if (!statusData.ai_running && startedAnalyzing) {
+                    startedAnalyzing = false;
+
+                    fetch('/get_latest_feedback')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.feedback && data.feedback !== "") {
+                                textContainer.innerText = data.feedback;
+                                playAudio("/get_audio?t=" + Date.now());
+                            }
+                        });
+                }
+            })
+            .catch(err => console.error("Error checking status:", err));
+    }, 500);
+</script>
 
 </body>
 </html>
