@@ -11,8 +11,8 @@ import asyncio
 import json
 import threading
 import time
-import mediapipe.python.solutions.pose as mp_pose
-import mediapipe.python.solutions.drawing_utils as mp_drawing
+
+
 
 load_dotenv()
 
@@ -44,7 +44,10 @@ ai_running = False
 with open("instructions.txt", "r") as f:
     instructions = f.read()
 
-pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+mp_pose = mp.solutions.pose
+
+mp_drawing = mp.solutions.drawing_utils
+
 
 def calculate_angle(a, b, c):
     ang = math.degrees(math.atan2(c[1]-b[1], c[0]-b[0]) - math.atan2(a[1]-b[1], a[0]-b[0]))
