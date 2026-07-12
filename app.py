@@ -310,16 +310,25 @@ async def ai(stats):
             print(f"Error with Gemini 5: {e}")
             pass
 
+
+
+
+ai_lock = threading.Lock()
 def run_ai_and_tts(stats):
     global latest_feedback_text, ai_running
 
-    response = asyncio.run(ai(stats))
-    if response:
-        asyncio.run(talk(response))
-        latest_feedback_text = response
+    if not ai_lock.acquire(blocking=False):
+        print("Coach is already talking. Skipping this shot.")
+        return
 
-
-    ai_running = False
+    try:
+        response = asyncio.run(ai(stats))
+        if response:
+            asyncio.run(talk(response))
+            latest_feedback_text = response
+    finally:
+        ai_running = False
+        ai_lock.release()
 
 def reset():
     global right_elbow_angles, left_elbow_angles, previous_distances, shooting, right_shoulder, right_elbow, right_wrist, left_shoulder, left_elbow, left_wrist, hip, knee, ankle, ai_response, beginning_angle, ending_angle
