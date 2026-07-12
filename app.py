@@ -103,7 +103,7 @@ def get_frames(open):
                 right_arm_range = max(right_elbow_angles) - min(right_elbow_angles)
                 left_arm_range = max(left_elbow_angles) - min(left_elbow_angles)
 
-              
+
 
                 if shooting:
                     right_shoulder.append([landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x * w, landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y * h])
@@ -124,6 +124,7 @@ def get_frames(open):
                         "left_elbow [in format (x, y)]": left_elbow,
                         "left_wrist [in format (x, y)]": left_wrist,
                         "hip [in format (x, y)]": hip,
+                        "elbow_extension_range": ending_angle - beginning_angle,
                         "knee [in format (x, y)]": knee,
                         "ankle [in format (x, y)]": ankle,
                         "dominant_hand": dominant_hand,
@@ -164,7 +165,7 @@ def get_frames(open):
                         print("Velocity2: ", velocity2)
                         current_time = time.time()
                         
-                        if velocity1 > 0.15 and velocity2 > 0.15 and not shooting and y_wrist < y_shoulder and (current_time - last_shot_time > 2.5):
+                        if velocity1 > 0.04 and velocity2 > 0.04 and not shooting and y_wrist < y_shoulder and (current_time - last_shot_time > 2.5):
                             shooting = True
 
                         elif velocity1 < 0.15 and velocity2 < 0.15 and shooting and y_wrist > y_shoulder:
@@ -200,7 +201,7 @@ def get_frames(open):
 
                         current_time = time.time()
 
-                        if velocity1 > 0.15 and velocity2 > 15.015 and not shooting and y_wrist < y_shoulder and (current_time - last_shot_time) > 2.5:
+                        if velocity1 > 0.04 and velocity2 > 0.04 and not shooting and y_wrist < y_shoulder and (current_time - last_shot_time) > 2.5:
                             shooting = True
 
                         elif velocity1 < 0.15 and velocity2 < 0.15 and shooting and y_wrist > y_shoulder:
@@ -311,8 +312,6 @@ async def ai(stats):
 
 def run_ai_and_tts(stats):
     global latest_feedback_text, ai_running
-
-    latest_feedback_text = "Shot Detected! AI Coach is analysing your shot..."
 
     response = asyncio.run(ai(stats))
     if response:
