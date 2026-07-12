@@ -5,3 +5,4 @@ edge-tts
 mediapipe==0.10.35
 numpy<2.0.0
 opencv-python-headless
+gunicorn
