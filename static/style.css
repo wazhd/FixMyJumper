@@ -1,0 +1,67 @@
+body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    font-family: system-ui, sans-serif;
+    margin: 0;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+}
+.app-layout {
+    display: flex;
+    gap: 30px;
+    max-width: 1100px;
+    width: 100%;
+}
+.feed-section {
+    flex: 1.2;
+    background-color: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #334155;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.video-feed-frame {
+    width: 100%;
+    max-width: 640px;
+    border-radius: 8px;
+    background-color: #000;
+}
+h2 { 
+    color: #f97316; 
+    margin-top: 0; 
+}
+.ai-recommendation-box {
+    flex: 1;
+    background-color: #1e293b;
+    border-radius: 12px;
+    border: 2px solid #f97316;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+}
+.box-header {
+    background-color: #f97316;
+    color: white;
+    padding: 15px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+.box-content {
+    padding: 20px;
+    flex: 1;
+}
+.ai-message {
+    background-color: #2563eb;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    line-height: 1.6;
+    display: none;
+}
+.empty-message {
+    color: #64748b;
+    font-style: italic;
+}

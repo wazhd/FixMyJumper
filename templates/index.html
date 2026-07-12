@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixYourJumper Automated AI Coach</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="app-layout">
+        <div class="feed-section">
+            <h2>Live Tracking Feed</h2>
+            <img src="{{ url_for('video_feed') }}" class="video-feed-frame" alt="FixMyJumper Live Feed">
+        </div>
+
+        <div class="ai-recommendation-box">
+            <div class="box-header">Automated AI Coach Recommendations</div>
+            <div class="box-content">
+                <div id="aiTextContainer" class="ai-message"></div>
+                <p id="emptyPrompt" class="empty-message">Stand in front of the camera and take a shot.The AI Coach will give you recommendations on how to fix your shooting form.</p>
+                
+                <audio id="audioPlayer" autoplay></audio>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let lastMessage = "";
+
+        setInterval(() => {
+            fetch('/get_latest_feedback')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.feedback && data.feedback !== lastMessage) {
+                        lastMessage = data.feedback;
+                        
+                        document.getElementById('aiTextContainer').innerText = data.feedback;
+                        document.getElementById('aiTextContainer').style.display = 'block';
+                        document.getElementById('emptyPrompt').style.display = 'none';
+
+                        const player = document.getElementById('audioPlayer');
+                        player.src = "/get_audio?t=" + new Date().getTime(); 
+                        player.play().catch(e => console.log("Audio playback waiting for user interaction:", e));
+                    }
+                })
+                .catch(err => console.error("Error fetching updates:", err));
+        }, 250);
+    </script>
+
+</body>
+</html>
