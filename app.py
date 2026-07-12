@@ -36,9 +36,9 @@ app = Flask(__name__)
 global ai_model
 ai_model = "gemini_1"
 
-global latest_feedback_text, ai_running
+global latest_feedback_text, ai_running, shot_version
 latest_feedback_text = ""
-
+shot_version = 0
 ai_running = False
 
 with open("instructions.txt", "r") as f:
@@ -323,13 +323,12 @@ def get_processing_audio():
 
 @app.route('/get_coach_status')
 def get_coach_status():
-    global ai_running
-    return jsonify({"ai_running": ai_running})
-
+    global ai_running, shot_version
+    return jsonify({"ai_running": ai_running, "shot_version": shot_version})
 
 ai_lock = threading.Lock()
 def run_ai_and_tts(stats):
-    global latest_feedback_text, ai_running
+    global latest_feedback_text, ai_running, shot_version
 
     if not ai_lock.acquire(blocking=False):
         print("Coach is already talking. Skipping this shot.")
@@ -340,10 +339,10 @@ def run_ai_and_tts(stats):
         if response:
             asyncio.run(talk(response))
             latest_feedback_text = response
+            shot_version += 1 
     finally:
         ai_running = False
         ai_lock.release()
-
 def reset():
     global right_elbow_angles, left_elbow_angles, previous_distances, shooting, right_shoulder, right_elbow, right_wrist, left_shoulder, left_elbow, left_wrist, hip, knee, ankle, ai_response, beginning_angle, ending_angle
     ai_response = False

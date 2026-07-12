@@ -27,6 +27,8 @@
 
 <script>
     let startedAnalyzing = false;
+    let lastPlayedVersion = -1;
+    let fetchInFlight = false;
 
     function playAudio(url) {
         const player = document.getElementById('audioPlayer');
@@ -54,17 +56,25 @@
                     playAudio("/get_processing_audio?t=" + Date.now());
                 }
 
-                if (!statusData.ai_running && startedAnalyzing) {
+                if (!statusData.ai_running && startedAnalyzing && !fetchInFlight) {
                     startedAnalyzing = false;
 
+                    // Ignore if we've already played this version (stale/duplicate)
+                    if (statusData.shot_version <= lastPlayedVersion) {
+                        return;
+                    }
+
+                    fetchInFlight = true;
                     fetch('/get_latest_feedback')
                         .then(response => response.json())
                         .then(data => {
-                            if (data.feedback && data.feedback !== "") {
+                            if (data.feedback && data.feedback !== "" && statusData.shot_version > lastPlayedVersion) {
+                                lastPlayedVersion = statusData.shot_version;
                                 textContainer.innerText = data.feedback;
                                 playAudio("/get_audio?t=" + Date.now());
                             }
-                        });
+                        })
+                        .finally(() => { fetchInFlight = false; });
                 }
             })
             .catch(err => console.error("Error checking status:", err));
