@@ -1,0 +1,5 @@
+set -o errexit
+
+pip install -r requirements.txt
+
+apt-get update && apt-get install -y libgl1-mesa-glx libglib2.0-0
