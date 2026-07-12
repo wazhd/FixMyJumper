@@ -227,12 +227,14 @@ def get_frames(open):
 async def talk(text):
     try:
         communicate = edge_tts.Communicate(text, "en-US-AndrewNeural", rate="+10%")
-        output_path = "output.mp3"
-        await communicate.save(output_path)
-        return output_path
+        tmp_path = "output_tmp.mp3"
+        final_path = "output.mp3"
+        await communicate.save(tmp_path)
+        os.replace(tmp_path, final_path)
+        return True
     except Exception as e:
-        pass
-
+        print(f"TTS failed: {e}")
+        return False
 async def ai(stats):
     global ai_model
     if ai_model == "gemini_1":
@@ -331,15 +333,15 @@ def run_ai_and_tts(stats):
     global latest_feedback_text, ai_running, shot_version
 
     if not ai_lock.acquire(blocking=False):
-        print("Coach is already talking. Skipping this shot.")
         return
 
     try:
         response = asyncio.run(ai(stats))
         if response:
-            asyncio.run(talk(response))
-            latest_feedback_text = response
-            shot_version += 1 
+            saved_ok = asyncio.run(talk(response))
+            if saved_ok:
+                latest_feedback_text = response
+                shot_version += 1
     finally:
         ai_running = False
         ai_lock.release()
